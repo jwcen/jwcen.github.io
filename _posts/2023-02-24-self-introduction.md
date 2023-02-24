@@ -4,7 +4,7 @@ title: jayvee — 技术之路
 pin: true
 ---
 
-<span style="color:#ff2121">学习、踩坑、成长...</span>
+> 学习、踩坑、成长...
 
 
 ------
