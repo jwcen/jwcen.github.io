@@ -1,11 +1,13 @@
 ---
 layout: post
-title:  "从浏览器键入url到显示页面全过程"
+title:  "[算法] 双指针"
+categories: [数据结构与算法]
+tags: [双指针]
 ---
-![test](/assets/img/favicons/mstile-150x150.png)
-# 同向双指针
 
-## 209. 长度最小的子数组
+## 同向双指针
+
+### 209. 长度最小的子数组
 
 思路：双指针的滑动窗口
 
@@ -14,8 +16,6 @@ title:  "从浏览器键入url到显示页面全过程"
 时间复杂度：O(n)
 
 > 非`O(n^2)`，二重循环的复杂度可以理解为`left+=1` 的次数以及 `right += 1`的次数，至多加到`n`
-
-go:
 
 ```go
 func minSubArrayLen(target int, nums []int) int {
@@ -41,7 +41,6 @@ func minSubArrayLen(target int, nums []int) int {
 func min(a, b int) int { if a < b { return a }; return b }
 ```
 
-py: 
 
 ```python
 class Solution:
@@ -60,7 +59,7 @@ class Solution:
         return ans if ans <= n else 0 
 ```
 
-## [713. 乘积小于 K 的子数组](https://leetcode.cn/problems/subarray-product-less-than-k/)
+### [713. 乘积小于 K 的子数组](https://leetcode.cn/problems/subarray-product-less-than-k/)
 
 给你一个整数数组 `nums` 和一个整数 `k` ，请你返回子数组内所有元素的乘积严格小于 `k` 的连续子数组的数目。
 
@@ -120,7 +119,7 @@ class Solution:
         return ans 
 ```
 
-## [3. 无重复字符的最长子串]() ==重要！==
+### [3. 无重复字符的最长子串]() ==重要！==
 
 思路：双指针滑窗+hashmap
 
@@ -150,7 +149,7 @@ func max(a, b int) int { if a < b { return b }; return a }
 
 空间复杂度：O(128) or O(len(set(s))) or O(1)，常数空间
 
-## [1004. 最大连续1的个数 III](https://leetcode.cn/problems/max-consecutive-ones-iii/description/)
+### [1004. 最大连续1的个数 III](https://leetcode.cn/problems/max-consecutive-ones-iii/description/)
 
 ```go
 func longestOnes(nums []int, k int) int {
@@ -176,9 +175,9 @@ func longestOnes(nums []int, k int) int {
 func max(a, b int) int { if a < b { return b }; return a }
 ```
 
-# 相向双指针
+## 相向双指针
 
-## [1. 两数之和]()
+### [1. 两数之和]()
 
 思路：hashmap
 
@@ -195,7 +194,7 @@ func twoSum(nums []int, tar int) []int {
 } 
 ```
 
-## [167. 两数之和2-有序数组]()
+### [167. 两数之和2-有序数组]()
 
 注意题目条件：有序！！！直接使用相向双指针
 
@@ -221,11 +220,11 @@ func twoSum(nums []int, target int) []int {
 
 
 
-## [15. 三数之和](https://leetcode.cn/problems/3sum/)
+### [15. 三数之和](https://leetcode.cn/problems/3sum/)
 
 你返回所有和为 0 且不重复的三元组。
 
-时间O(n^2)
+> 时间O(n^2)
 
 ```go
 func threeSum(nums []int) [][]int {
@@ -273,7 +272,7 @@ func threeSum(nums []int) [][]int {
 }
 ```
 
-## 11. 盛最多水的容器
+### 11. 盛最多水的容器
 
 给定一个长度为 `n` 的整数数组 `height` 。有 `n` 条垂线，第 `i` 条线的两个端点是 `(i, 0)` 和 `(i, height[i])` 。
 
@@ -305,7 +304,7 @@ func max(a, b int) int { if a < b { return b }; return a }
 func min(a, b int) int { if a > b { return b }; return a }
 ```
 
-## 42. 接雨水 ==重要！！！==
+### 42. 接雨水 ==重要！！！==
 
 - 两个额外的数组
 
@@ -320,7 +319,7 @@ func min(a, b int) int { if a > b { return b }; return a }
 
 - - **curWater = min(前缀最大值[i]，后缀最大值[i]) - height[i]**
 
-- ```python
+```python
   class Solution:
       def trap(self, height: List[int]) -> int:
           n = len(height)
@@ -344,11 +343,11 @@ func min(a, b int) int { if a > b { return b }; return a }
   # 时空O(n)
   ```
 
-- 优化：空间O(1)
+优化：空间O(1)
 
-- - 对于数组的每一个元素，找到其左侧和右侧的最高点，然后取两个最高点较小者，减去当前元素的高度，就是当前位置可存储的雨水量。
+-  对于数组的每一个元素，找到其左侧和右侧的最高点，然后取两个最高点较小者，减去当前元素的高度，就是当前位置可存储的雨水量。
 
-- ```python
+```python
   class Solution:
       def trap(self, height: List[int]) -> int:
           n = len(height) 
@@ -370,4 +369,4 @@ func min(a, b int) int { if a > b { return b }; return a }
           return ans 
   ```
 
-- 
+> [0x3f]()
