@@ -2,6 +2,7 @@
 layout: post
 title: jayvee — 技术之路
 pin: true
+description: jayvee — 技术之路 - 学习、踩坑、成长...
 ---
 
 > 学习、踩坑、成长...
