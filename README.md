@@ -35,6 +35,7 @@ layout: post
 title: A Trip
 categories: [blog, travel]
 tags: [hot, summer]
+permalink: /:categories/:year/:month/:day/:title:output_ext
 ---
 ```
 
