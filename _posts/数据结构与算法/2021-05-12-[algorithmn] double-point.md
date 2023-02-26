@@ -1,9 +1,12 @@
 ---
 layout: post
-title:  "[算法] 双指针"
+title:  "[算法] 同向/相向双指针"
 categories: [数据结构与算法]
 tags: [双指针]
+math: true
 ---
+
+
 
 ## 同向双指针
 
@@ -15,9 +18,10 @@ tags: [双指针]
 
 时间复杂度：O(n)
 
-> 非`O(n^2)`，二重循环的复杂度可以理解为`left+=1` 的次数以及 `right += 1`的次数，至多加到`n`
+> 非$ O(n^2) $，二重循环的复杂度可以理解为 $left+=1 $ 的次数以及 $ right += 1 $ 的次数，至多加到 $ n $
 
-```go
+{% details Golang %}
+~~~go
 func minSubArrayLen(target int, nums []int) int {
     n := len(nums) 
     left := 0
@@ -31,18 +35,17 @@ func minSubArrayLen(target int, nums []int) int {
             left++
         }
     }
-
     if ans <= n {
         return ans 
     }
     return 0 
 }
-
 func min(a, b int) int { if a < b { return a }; return b }
-```
+~~~
+{% enddetails %}
 
-
-```python
+{% details Python code %}
+~~~python
 class Solution:
     def minSubArrayLen(self, target: int, nums: List[int]) -> int:
         n = len(nums)
@@ -57,7 +60,9 @@ class Solution:
                 left += 1
 
         return ans if ans <= n else 0 
-```
+~~~
+{% enddetails %}
+
 
 ### [713. 乘积小于 K 的子数组](https://leetcode.cn/problems/subarray-product-less-than-k/)
 
@@ -72,9 +77,8 @@ class Solution:
 
 > 思路：方法同上，若元素的乘积>=k就把左端点右移，缩小子数组长度，直到乘积小于k。
 
-go
-
-```go
+{% details Golang code %}
+~~~go
 func numSubarrayProductLessThanK(nums []int, k int) int {
     if k <= 1 {
         return 0 
@@ -93,39 +97,16 @@ func numSubarrayProductLessThanK(nums []int, k int) int {
     }
     return ans 
 }
-```
+~~~
+{% enddetails %}
 
-
-
-python 
-
-```python
-class Solution:
-    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:
-        if k <= 1:
-            return 0 
-        
-        ans = 0  # 初始子数组数目为0
-        prod = 1  # 初始乘积为1
-        left = 0 
-        for right, num in enumerate(nums):
-            prod *= num 
-            while prod >= k:
-                prod /= nums[left]
-                left += 1 
-
-            ans += right - left + 1  # 统计子数组数目
-
-        return ans 
-```
 
 ### [3. 无重复字符的最长子串]() ==重要！==
 
-思路：双指针滑窗+hashmap
+> 思路：双指针滑窗+hashmap
 
-go
-
-```go
+{% details Golang code %}
+~~~go
 func lengthOfLongestSubstring(s string) int {
     // freq := map[byte]int{} // key:byte, val:int
     freq := make([]byte, 128) // s 由英文字母、数字、符号和空格组成
@@ -143,15 +124,16 @@ func lengthOfLongestSubstring(s string) int {
 }
 
 func max(a, b int) int { if a < b { return b }; return a }
-```
+~~~
+{% enddetails %}
 
-时间复杂度：O(n)
-
-空间复杂度：O(128) or O(len(set(s))) or O(1)，常数空间
+- 时间复杂度：$ O(n) $
+- 空间复杂度：$ O(128)$ or $O(len(set(s)))$ or $O(1)$，常数空间
 
 ### [1004. 最大连续1的个数 III](https://leetcode.cn/problems/max-consecutive-ones-iii/description/)
 
-```go
+{% details Golang code %}
+~~~go
 func longestOnes(nums []int, k int) int {
     ans := 0 
     left := 0 
@@ -173,15 +155,17 @@ func longestOnes(nums []int, k int) int {
 }
 
 func max(a, b int) int { if a < b { return b }; return a }
-```
+~~~
+{% enddetails %}
 
 ## 相向双指针
 
 ### [1. 两数之和]()
 
-思路：hashmap
+> 思路：hashmap
 
-```go
+{% details Golang code %}
+~~~go
 func twoSum(nums []int, tar int) []int {
     m := map[int]int{} // key存元素,val存索引
     for i, num := range nums {
@@ -192,13 +176,16 @@ func twoSum(nums []int, tar int) []int {
     }  
     return []int{}
 } 
-```
+~~~
+{% enddetails %}
 
 ### [167. 两数之和2-有序数组]()
 
-注意题目条件：有序！！！直接使用相向双指针
+> 注意题目条件：有序！！！直接使用相向双指针
+{: .prompt-warning}
 
-```go
+{% details Golang code %}
+~~~go
 func twoSum(nums []int, target int) []int {
     left, right := 0, len(nums)-1
     for true {
@@ -215,8 +202,9 @@ func twoSum(nums []int, target int) []int {
     }
     return []int{left+1, right+1}
 }
-// 时间：O(n)-- 每次通过大小关系直接去掉了一个数，每次花费O(1)
-```
+~~~
+{% enddetails %}
+- 时间：$O(n)$-- 每次通过大小关系直接去掉了一个数，每次花费 $O(1)$
 
 
 
@@ -224,9 +212,10 @@ func twoSum(nums []int, target int) []int {
 
 你返回所有和为 0 且不重复的三元组。
 
-> 时间O(n^2)
+> 时间 $O(n^2)$
 
-```go
+{% details Golang code %}
+~~~go
 func threeSum(nums []int) [][]int {
     // 三元组的顺序并不重要---那就规定一个顺序: i < j < k 
     // 不可以包含重复的三元组---排序，去重
@@ -270,17 +259,16 @@ func threeSum(nums []int) [][]int {
     }
     return ans
 }
-```
+~~~
+{% enddetails %}
 
 ### 11. 盛最多水的容器
 
 给定一个长度为 `n` 的整数数组 `height` 。有 `n` 条垂线，第 `i` 条线的两个端点是 `(i, 0)` 和 `(i, height[i])` 。
+找出其中的两条线，使得它们与 `x` 轴共同构成的容器可以容纳最多的水。返回容器可以储存的最大水量。
 
-找出其中的两条线，使得它们与 `x` 轴共同构成的容器可以容纳最多的水。
-
-返回容器可以储存的最大水量。
-
-```go
+{% details Golang code %}
+~~~go
 func maxArea(height []int) int {
     n := len(height) 
     if n < 2 { return 0 }
@@ -302,14 +290,14 @@ func maxArea(height []int) int {
 
 func max(a, b int) int { if a < b { return b }; return a }
 func min(a, b int) int { if a > b { return b }; return a }
-```
+~~~
+{% enddetails %}
 
 ### 42. 接雨水 ==重要！！！==
 
-- 两个额外的数组
-
-- - pre_max数组存储从左到第i各位置的最大高度---前缀最大值
-  - suf_max从右......最大高度---后缀最大值
+思路：使用两个额外的数组：
+- pre_max数组存储从左到第i各位置的最大高度---前缀最大值
+- suf_max从右......最大高度---后缀最大值
 
 - 对每个前缀最大值，用上一个前缀最大值和当前高度取最大值得到当前前缀最大值
 
@@ -317,56 +305,63 @@ func min(a, b int) int { if a > b { return b }; return a }
 
 - 最后同时遍历高度h、前后缀最大值，计算
 
-- - **curWater = min(前缀最大值[i]，后缀最大值[i]) - height[i]**
+  - **curWater = min(前缀最大值[i]，后缀最大值[i]) - height[i]**
 
-```python
-  class Solution:
-      def trap(self, height: List[int]) -> int:
-          n = len(height)
-          pre_max = [0] * n
-          pre_max[0] = height[0]
-          for i in range(1, n):
-              pre_max[i] = max(pre_max[i-1], height[i])
-  
-          suf_max = [0] * n 
-          suf_max[-1] = height[-1]
-          for i in range(n-2, -1, -1):
-              suf_max[i] = max(suf_max[i+1], height[i])
-  
-          ans = 0
-          for h, pre, suf in zip(height, pre_max, suf_max):
-              # 水桶的长度 - 高度 = 能接多少水
-              ans += min(pre, suf) - h 
-          
-          return ans 
+{% details Python code %}
+~~~python
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        n = len(height)
+        pre_max = [0] * n
+        pre_max[0] = height[0]
+        for i in range(1, n):
+            pre_max[i] = max(pre_max[i-1], height[i])
+
+        suf_max = [0] * n 
+        suf_max[-1] = height[-1]
+        for i in range(n-2, -1, -1):
+            suf_max[i] = max(suf_max[i+1], height[i])
+
+        ans = 0
+        for h, pre, suf in zip(height, pre_max, suf_max):
+            # 水桶的长度 - 高度 = 能接多少水
+            ans += min(pre, suf) - h 
+        
+        return ans 
   
   # 时空O(n)
-  ```
+~~~
+{% enddetails %}
 
-优化：空间O(1)
+优化：空间O(1)，思路：
+- 对于数组的每一个元素，找到其左侧和右侧的最高点，然后取两个最高点较小者，减去当前元素的高度，就是当前位置可存储的雨水量。
 
--  对于数组的每一个元素，找到其左侧和右侧的最高点，然后取两个最高点较小者，减去当前元素的高度，就是当前位置可存储的雨水量。
+{% details Python code %}
+~~~python
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        n = len(height) 
+        pre_max = 0 
+        suf_max = 0 
+        left, right = 0, n-1
+        ans = 0 
+        while left <= right:
+            pre_max = max(pre_max, height[left])
+            suf_max = max(suf_max, height[right])
 
-```python
-  class Solution:
-      def trap(self, height: List[int]) -> int:
-          n = len(height) 
-          pre_max = 0 
-          suf_max = 0 
-          left, right = 0, n-1
-          ans = 0 
-          while left <= right:
-              pre_max = max(pre_max, height[left])
-              suf_max = max(suf_max, height[right])
-  
-              if pre_max < suf_max:
-                  ans += pre_max - height[left]
-                  left += 1 
-              else:
-                  ans += suf_max - height[right]
-                  right -= 1 
-          
-          return ans 
-  ```
+            if pre_max < suf_max:
+                ans += pre_max - height[left]
+                left += 1 
+            else:
+                ans += suf_max - height[right]
+                right -= 1 
+        
+        return ans 
+~~~
+{% enddetails %}
 
-> [0x3f]()
+<br>
+------
+题目来源
+> [0x3f]()  
+> leetcode.cn
