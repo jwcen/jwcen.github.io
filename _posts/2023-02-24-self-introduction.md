@@ -1,6 +1,7 @@
 ---
 layout: post
 title: jayvee — 技术之路
+permalink: /posts/:title:output_ext
 pin: true
 description: jayvee — 技术之路 - 学习、踩坑、成长...
 ---

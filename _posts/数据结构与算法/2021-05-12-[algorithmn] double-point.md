@@ -1,12 +1,14 @@
 ---
 layout: post
-title:  "[算法] 同向/相向双指针"
+title:  "[算法] 01-同向/相向双指针"
 categories: [数据结构与算法]
 tags: [双指针]
+permalink: /posts/:title:output_ext
 math: true
 ---
 
-
+> 如需转载，请附上链接：[https://jwcen.github.io/](https://jwcen.github.io/)
+{: .prompt-tip}
 
 ## 同向双指针
 
@@ -101,7 +103,7 @@ func numSubarrayProductLessThanK(nums []int, k int) int {
 {% enddetails %}
 
 
-### [3. 无重复字符的最长子串]() ==重要！==
+### [3. 无重复字符的最长子串]() ⭐⭐⭐
 
 > 思路：双指针滑窗+hashmap
 
@@ -208,7 +210,7 @@ func twoSum(nums []int, target int) []int {
 
 
 
-### [15. 三数之和](https://leetcode.cn/problems/3sum/)
+### [15. 三数之和](https://leetcode.cn/problems/3sum/)⭐⭐⭐
 
 你返回所有和为 0 且不重复的三元组。
 
@@ -293,7 +295,7 @@ func min(a, b int) int { if a > b { return b }; return a }
 ~~~
 {% enddetails %}
 
-### 42. 接雨水 ==重要！！！==
+### 42. 接雨水⭐⭐⭐
 
 思路：使用两个额外的数组：
 - pre_max数组存储从左到第i各位置的最大高度---前缀最大值
@@ -360,8 +362,11 @@ class Solution:
 ~~~
 {% enddetails %}
 
-<br>
+
 ------
 题目来源
 > [0x3f]()  
 > leetcode.cn
+
+> 如需转载，请附上链接：[https://jwcen.github.io/](https://jwcen.github.io/)
+{: .prompt-tip}
