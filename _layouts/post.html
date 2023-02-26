@@ -71,12 +71,9 @@ tail_includes:
 
       <div>
         <!-- page views -->
-        <span id="busuanzi_value_page_uv">
-          <em id="pv" class="pageviews">
-            <i class="fas fa-spinner fa-spin fa-fw"></i>
-          </em>
-        </span> views
-        
+        <span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span> views</span>
+
+
         {% if site.google_analytics.pv.proxy_endpoint or site.google_analytics.pv.cache_path %}
         <span>
           <em id="pv" class="pageviews">
