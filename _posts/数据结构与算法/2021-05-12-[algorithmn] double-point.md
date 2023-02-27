@@ -1,9 +1,9 @@
 ---
 layout: post
 title:  "[算法] 01-同向/相向双指针"
-categories: [数据结构与算法]
+categories: [Algorithms]
 tags: [双指针]
-permalink: /posts/:title:output_ext
+permalink: /posts/:categories/:title:output_ext
 math: true
 ---
 

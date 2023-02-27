@@ -1,9 +1,9 @@
 ---
 layout: post
 title:  "[数据结构] 01-链表相关"
-categories: [数据结构与算法]
+categories: [Data-Structure]
 tags: [链表]
-permalink: /posts/:title:output_ext
+permalink: /posts/:categories/:title:output_ext
 description: 链表、循环链表、双向链表、环形链表
 math: true
 ---
