@@ -561,5 +561,110 @@ class Solution:
 
 
 ## 快慢指针
+### 876.链表的中间节点
+题目：返回链表的中间节点。  
+分析：
+- 链表长度奇数：fast指针在最后一个节点，中间节点就是慢指针  
+- 链表长度偶数：fast指针为空时，slow就是中间节点
+{% details 快慢指针 %}
+~~~python 
+class Solution:
+    def middleNode(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow = fast = head 
+        while fast and fast.next:
+            slow = slow.next 
+            fast = fast.next.next 
+
+        return slow
+~~~
+{% enddetails %}
+
+### 141. 环形链表（链表是否有环）
+思路：用相对速度分析，如果有环，快的一定会追上慢的。
+{% details Python code %}
+~~~python
+class Solution:
+    def hasCycle(self, head: ListNode) -> bool:
+        if not head or not head.next:
+            return False 
+
+        slow = fast = head 
+        while fast and fast.next:
+            slow = slow.next 
+            fast = fast.next.next 
+            if slow == fast:
+                return True 
+
+        return False
+~~~
+{% enddetails %}
+
+### 142. 环形链表2（环的入口点）
+题目：返回链表开始入环的第一个节点。  
+思路：  
+- 给定两个指针，`slow = fast = head`，每次 `fast` 前进两步， `slow` 前进一步。
+- 如果`fast`可以走到尽头，即`fast`为NULL，说 明没有环路；如果 fast 可以一直走下去，那么说明一定有环路，且 slow 和 fast 会在某点相遇。
+- 当 slow 和 fast 第一次相遇时，slow从相遇节点出发，head头节点出发，并让 slow 和 fast 每次都前进一步。
+- 当 slow 和 head 相遇时，相遇的节点即为环路的开始点。
+{% details Python code %}
+~~~python
+class Solution:
+    def detectCycle(self, head: ListNode) -> ListNode:
+        slow = fast = head 
+        while fast and fast.next:
+            slow = slow.next 
+            fast = fast.next.next 
+            if slow == fast:
+                # slow 和 头节点没有相遇，各走一步
+                while slow != head:
+                    slow = slow.next 
+                    head = head.next 
+                return slow 
+        return None 
+~~~
+{% enddetails %}
+> 时间 $ O(n) $ ：慢指针相遇前后都走了n步
+
+### 143. 重排链表
+思路：链表中间节点 + 反转链表
+1. 快慢指针，寻找中间节点，截断链表 
+2. 反转后半部分链表 
+3. 合并两个链表: 遍历两个链表，后面的塞到前面的“缝隙里”  
+{% details Python code %}
+~~~python
+class Solution:
+    def reorderList(self, head: ListNode) -> None:
+        def middle_node(head: ListNode) -> ListNode:
+            slow = fast = head 
+            while fast and fast.next:
+                slow = slow.next
+                fast = fast.next.next 
+            return slow 
+
+        def reverse(head: ListNode) -> ListNode:
+            pre = None 
+            cur = head 
+            while cur:
+                nxt = cur.next 
+                cur.next = pre 
+                pre = cur 
+                cur = nxt 
+            return pre 
+
+        # start here
+        mid = middle_node(head) 
+        head2 = reverse(mid) 
+        while head2.next:
+            nxt = head.next 
+            nxt2 = head2.next
+            head.next = head2 
+            head2.next = nxt 
+            # 更新到下一节点
+            head = nxt 
+            head2 = nxt2 
+~~~
+{% enddetails %}
+
+
 ## 删除节点
 ## 合并/排序/相加
