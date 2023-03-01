@@ -8,6 +8,13 @@ description: 链表、循环链表、双向链表、环形链表
 math: true
 ---
 
+> 如需转载，请附上链接：[https://jwcen.github.io/](https://jwcen.github.io/)
+{: .prompt-tip}
+
+* This will become a table of contents (this text will be scrapped).
+{:toc}
+
+
 ## 设计链表
 {% details 初始化链表代码 %}
 ~~~go

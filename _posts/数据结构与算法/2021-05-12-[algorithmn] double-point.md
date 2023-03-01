@@ -10,6 +10,9 @@ math: true
 > 如需转载，请附上链接：[https://jwcen.github.io/](https://jwcen.github.io/)
 {: .prompt-tip}
 
+* This will become a table of contents (this text will be scrapped).
+{:toc}
+
 ## 同向双指针
 
 ### 209. 长度最小的子数组
