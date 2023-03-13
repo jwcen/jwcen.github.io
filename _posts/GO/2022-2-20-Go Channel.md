@@ -6,6 +6,7 @@ tags: [channel]
 permalink: /posts/:categories/:title:output_ext
 description: Go语言-channel的使用和底层原理
 math: true
+published: false 
 ---
 
 > 如需转载，请附上链接：[https://jwcen.github.io/](https://jwcen.github.io/)
