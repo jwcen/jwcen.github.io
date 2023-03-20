@@ -167,6 +167,8 @@ type hchan struct {
 - 另一重要部分是`recvq`和`sendq`两个双向链表，前者是等待读通道(`<-channel`)的 goroutine 队列，后者是等待写通道(`channel <- xxx`)的 goroutine 队列。  
 - 若一个 goroutine 阻塞于`channel`了，那么它就被挂在`recvq`或`sendq`队列中。`waitq`是链表的定义，包含一个头结点和一个尾结点：
 `sudog` 表示一个在等待列表中的 Goroutine，该结构中存储了两个分别指向前后
+
+
 ```go
 type waitq struct {
     first *sudog
@@ -182,6 +184,7 @@ struct  SudoG
     byte*    elem;        // 数据元素
 };
 ```
+
 
 SudoG里主要结构是一个`g`和一个`elem`。`elem`用于存储 goroutine 的数据。
 - 读通道时，数据会从`Hchan`的`buf队列`中拷贝到`SudoG`的`elem`域。
@@ -202,10 +205,10 @@ ch := make(chan string)
 > channel 的创建都是调用的 mallocgc 方法，也就是 channel 都是创建在堆上的。
 > 因此 channel 是会被 GC 回收的，自然也不总是需要 close 方法来进行显示关闭了。
 
-### 发送数据
+### 发送数据（写）
 ```go 
 go func() {
-    ch <- "煎鱼"
+    ch <- "666"
 }()
 ```
 
@@ -227,18 +230,26 @@ go func() {
   - 当 sendx 等于 dataqsiz 时会重新回到数组开始的位置
 - 阻塞发送
   - 当 Channel 没有接收者能够处理数据时，向 Channel 发送数据会被下游阻塞（使用 select 关键字可以向 Channel 非阻塞地发送消息）
-  - 
 
 
 
-
-> 快速回答：
-> 通道写入数据的过程中，首先判断是否有正在等待读取的协程，如果有的话，复制数据给此协程； 否则继续判断是否有空闲缓冲区，如果有的话把数据复制到缓冲区；否则，把当前goroutine放入等待写入队列。
-
-### 接收数据 
-
+读写操作的细节都可以细化为：
+- 第一，加锁
+- 第二，把数据从goroutine中copy到“队列”中(或者从队列中copy到goroutine中）。
+- 第三，释放锁
 
 
+> 当协程尝试**从未关闭的 `channel` 中读取数据**时，内部的操作如下：
+
+- **当 `buf` 非空时，此时 `recvq` 必为空**`，buf` 弹出一个元素给读协程，读协程获得数据后继续执行，此时若 **`sendq` 非空**，则从 sendq 中弹出一个写协程转入 `running` 状态，待写数据入队列 `buf` ，此时读取操作 `<- ch` 未阻塞；
+
+- **当 `buf` 为空但 `sendq` 非空时(不带缓冲的 `channel`)**，则从 `sendq` 中弹出一个写协程转入 `running` 状态，待写数据直接传递给读协程，读协程继续执行，此时读取操作 `<- ch` 未阻塞；
+
+- **当 `buf` 为空并且 `sendq` 也为空时**，读协程入队列 `recvq` 并转入 `blocking` 状态，当后续有其他协程往 `channel` 写数据时，读协程才会重新转入 `running` 状态，**此时读取操作 `<- ch` 阻塞**。
+
+- 读一个关闭的通道，永远不会阻塞，会返回一个通道数据类型的零值。
+- 写一个关闭的通道，则会panic。
+- 关闭一个空通道，也会导致panic。
 
 ----
 参考
