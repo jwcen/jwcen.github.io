@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  创建容器镜像：如何编写正确、高效的Dockerfile
+  #
+
+这些镜像是怎么创建出来的？我们能不能够制作属于自己的镜像呢？
+
+  镜像的内部机制是什么
+  #
+
+
+为了保证容器运行环境的一致性，镜像必须把应用程序所在操作系统的根目录，也就是 rootfs，都包含进来。
+但如果每个镜像都重复做这样的打包操作，仍然会导致大量的冗余。
+分层。
+容器镜像内部是由许多的镜像层组成的，每层都是只读不可修改的一组文件，相同的层可以在镜像之间共享，然后多个层像搭积木一样堆叠起来，再使用一种叫“Union FS 联合文件系统”的技术把它们合并在一起。
+可以用命令 docker inspect 来查看镜像的分层信息：
+docker inspect nginx:alpine
+//...
+ &#34;RootFS&#34;: {
+            &#34;Type&#34;: &#34;layers&#34;,
+            &#34;Layers&#34;: [
+                &#34;sha256:92770f546e065c4942829b1f0d7d1f02c2eb1e6acf0d1bc08ef0bf6be4972839&#34;,
+                &#34;sha256:8ae474e0cc8f5a81405b04143604f78bfac4756c523e276a36921a8c4da36567&#34;,
+                &#34;sha256:f5525891d9e9b43a95b4aa1f79405087922489eb300864a2683262aae0fa5b3a&#34;,
+                &#34;sha256:66283570f41bca3619443d121a79e810b8a72849b5329319993e538d563b3e2f&#34;,
+                &#34;sha256:c2d3ab485d1b375fdd309458d69d93f8eb9aba8472e928efa32d9e5eda631440&#34;,
+                &#34;sha256:cddc309885a283a35ef142af78bc6f2e9c9db10e1981c4ea9cfb2c00b83e68ff&#34;,
+                &#34;sha256:0d0e9c83b6f775d68c7517aabf39ec9123ffca29672e3c3f83c5af7fc6aa242b&#34;
+            ]
+        },
+//...
+
+  Dockerfile 是什么
+  #
+
+Dockerfile 是一个文本格式的配置文件，里面记录了一系列的构建指令，比如选择基础镜像、拷贝文件、运行脚本等等，每个指令都会生成一个 Layer，而 Docker 顺序执行这个文件里的所有步骤，最后就会创建出一个新的镜像出来。
+示例：
+# 使用Python 3.9作为基础镜像
+FROM python:3.9-slim
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制当前目录下的所有文件到工作目录
+COPY . /app
+
+# 安装依赖
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 暴露端口
+EXPOSE 5000
+
+# 容器启动时执行的命令
+CMD [&#34;python&#34;, &#34;app.py&#34;]
+docker build -t my-python-app .
+
+# 运行容器
+docker run -p 5000:5000 my-python-app
+
+创建镜像需要编写 Dockerfile，写清楚创建镜像的步骤，每个指令都会生成一个Layer
+Dockerfile 里，第一个指令必须是 FROM，用来选择基础镜像，常用的有 Alpine、
+Ubuntu 等。其他常用的指令有：COPY、RUN、EXPOSE，分别是拷贝文件，运行 Shell
+命令，声明服务端口号。
+docker build 需要用 -f 来指定 Dockerfile，如果不指定就使用当前目录下名字是
+“Dockerfile”的文件。
+docker build 需要指定“构建上下文”，其中的文件会打包上传到 Docker daemon，所以尽量不要在“构建上下文”中存放多余的文件。
+创建镜像的时候应当尽量使用 -t 参数，为镜像起一个有意义的名字，方便管理。5.
+
+
+  镜像里的层都是只读不可修改的，但容器运行的时候经常会写入数据，这个冲突应该怎么解决呢？
+  #
+
+docker在挂载镜像文件的时候除了镜像文件的只读层，还会挂载一个‘可读写层’，在容器运行时，它以copy-on-write的方式，记录容器中的“写”操作；">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/docs/docker/3/">
+  <meta property="og:site_name" content="My New Hugo Site">
+  <meta property="og:title" content="My New Hugo Site">
+  <meta property="og:description" content="创建容器镜像：如何编写正确、高效的Dockerfile # 这些镜像是怎么创建出来的？我们能不能够制作属于自己的镜像呢？
+镜像的内部机制是什么 # 为了保证容器运行环境的一致性，镜像必须把应用程序所在操作系统的根目录，也就是 rootfs，都包含进来。 但如果每个镜像都重复做这样的打包操作，仍然会导致大量的冗余。
+分层。 容器镜像内部是由许多的镜像层组成的，每层都是只读不可修改的一组文件，相同的层可以在镜像之间共享，然后多个层像搭积木一样堆叠起来，再使用一种叫“Union FS 联合文件系统”的技术把它们合并在一起。
+可以用命令 docker inspect 来查看镜像的分层信息：
+docker inspect nginx:alpine //... &#34;RootFS&#34;: { &#34;Type&#34;: &#34;layers&#34;, &#34;Layers&#34;: [ &#34;sha256:92770f546e065c4942829b1f0d7d1f02c2eb1e6acf0d1bc08ef0bf6be4972839&#34;, &#34;sha256:8ae474e0cc8f5a81405b04143604f78bfac4756c523e276a36921a8c4da36567&#34;, &#34;sha256:f5525891d9e9b43a95b4aa1f79405087922489eb300864a2683262aae0fa5b3a&#34;, &#34;sha256:66283570f41bca3619443d121a79e810b8a72849b5329319993e538d563b3e2f&#34;, &#34;sha256:c2d3ab485d1b375fdd309458d69d93f8eb9aba8472e928efa32d9e5eda631440&#34;, &#34;sha256:cddc309885a283a35ef142af78bc6f2e9c9db10e1981c4ea9cfb2c00b83e68ff&#34;, &#34;sha256:0d0e9c83b6f775d68c7517aabf39ec9123ffca29672e3c3f83c5af7fc6aa242b&#34; ] }, //... Dockerfile 是什么 # Dockerfile 是一个文本格式的配置文件，里面记录了一系列的构建指令，比如选择基础镜像、拷贝文件、运行脚本等等，每个指令都会生成一个 Layer，而 Docker 顺序执行这个文件里的所有步骤，最后就会创建出一个新的镜像出来。
+示例：
+# 使用Python 3.9作为基础镜像 FROM python:3.9-slim # 设置工作目录 WORKDIR /app # 复制当前目录下的所有文件到工作目录 COPY . /app # 安装依赖 RUN pip install --no-cache-dir -r requirements.txt # 暴露端口 EXPOSE 5000 # 容器启动时执行的命令 CMD [&#34;python&#34;, &#34;app.py&#34;] docker build -t my-python-app . # 运行容器 docker run -p 5000:5000 my-python-app 创建镜像需要编写 Dockerfile，写清楚创建镜像的步骤，每个指令都会生成一个Layer Dockerfile 里，第一个指令必须是 FROM，用来选择基础镜像，常用的有 Alpine、 Ubuntu 等。其他常用的指令有：COPY、RUN、EXPOSE，分别是拷贝文件，运行 Shell 命令，声明服务端口号。 docker build 需要用 -f 来指定 Dockerfile，如果不指定就使用当前目录下名字是 “Dockerfile”的文件。 docker build 需要指定“构建上下文”，其中的文件会打包上传到 Docker daemon，所以尽量不要在“构建上下文”中存放多余的文件。 创建镜像的时候应当尽量使用 -t 参数，为镜像起一个有意义的名字，方便管理。5. 镜像里的层都是只读不可修改的，但容器运行的时候经常会写入数据，这个冲突应该怎么解决呢？ # docker在挂载镜像文件的时候除了镜像文件的只读层，还会挂载一个‘可读写层’，在容器运行时，它以copy-on-write的方式，记录容器中的“写”操作；">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+<title>3.创建容器镜像：如何编写正确、高效的 Dockerfile | My New Hugo Site</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="http://localhost:1313/docs/docker/3/">
+<link rel="stylesheet" href="/book.min.a7616cf2799b58bddffce9438e31fdbfc6393687cfc0950a4a17cd1cce7e35f6.css" integrity="sha256-p2Fs8nmbWL3f/OlDjjH9v8Y5NofPwJUKShfNHM5&#43;NfY=" crossorigin="anonymous">
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/en.search.min.0cfb758d5015d0ed3024b26cd0d3f4e531f056bba8d896d2ef6c002b339e050e.js" integrity="sha256-DPt1jVAV0O0wJLJs0NP05THwVruo2JbS72wAKzOeBQ4=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>My New Hugo Site</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-3f1cb50e59bc1f6ffc84a359e23bb83b" class="toggle"  />
+    <label for="section-3f1cb50e59bc1f6ffc84a359e23bb83b" class="flex justify-between">
+      <a href="/docs/example/" class="">Example Site</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-c9d631a7ec46475d0b08fd93f0a51b51" class="toggle"  />
+    <label for="section-c9d631a7ec46475d0b08fd93f0a51b51" class="flex justify-between">
+      <a href="/docs/example/table-of-contents/" class="">Table of Contents</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/with-toc/" class="">With ToC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/without-toc/" class="">Without ToC</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-9fe5b538104d6feedd6d4402876a890c" class="toggle"  />
+    <label for="section-9fe5b538104d6feedd6d4402876a890c" class="flex justify-between">
+      <a role="button" class="">Collapsed</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/collapsed/3rd-level/" class="">3rd Level</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/collapsed/3rd-level/4th-level/" class="">4th Level</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-91ff85055480c667e82e532fec029d40" class="toggle" checked />
+    <label for="section-91ff85055480c667e82e532fec029d40" class="flex justify-between">
+      <a role="button" class="">Docker</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/1/" class="">1.容器是什么</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/2/" class="">2.常用的容器操作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/3/" class="active">3.创建容器镜像：如何编写正确、高效的 Dockerfile</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-6304924f51347481f4da36aae1a9b36d" class="toggle"  />
+    <label for="section-6304924f51347481f4da36aae1a9b36d" class="flex justify-between">
+      <a role="button" class="">Example3</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/buttons/" class="">Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/columns/" class="">Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/details/" class="">Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-2e51356a195401a62fea7dc12e8423f5" class="toggle"  />
+    <label for="section-2e51356a195401a62fea7dc12e8423f5" class="flex justify-between">
+      <a role="button" class="">Golang</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/buttons/" class="">Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/columns/" class="">Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/details/" class="">Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="/posts/"  >
+        Blog
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>3.创建容器镜像：如何编写正确、高效的 Dockerfile</h3>
+
+  <label for="toc-control">
+    
+    <img src="/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#镜像的内部机制是什么">镜像的内部机制是什么</a></li>
+    <li><a href="#dockerfile-是什么">Dockerfile 是什么</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="创建容器镜像如何编写正确高效的dockerfile">
+  创建容器镜像：如何编写正确、高效的Dockerfile
+  <a class="anchor" href="#%e5%88%9b%e5%bb%ba%e5%ae%b9%e5%99%a8%e9%95%9c%e5%83%8f%e5%a6%82%e4%bd%95%e7%bc%96%e5%86%99%e6%ad%a3%e7%a1%ae%e9%ab%98%e6%95%88%e7%9a%84dockerfile">#</a>
+</h1>
+<p>这些镜像是怎么创建出来的？我们能不能够制作属于自己的镜像呢？</p>
+<h2 id="镜像的内部机制是什么">
+  镜像的内部机制是什么
+  <a class="anchor" href="#%e9%95%9c%e5%83%8f%e7%9a%84%e5%86%85%e9%83%a8%e6%9c%ba%e5%88%b6%e6%98%af%e4%bb%80%e4%b9%88">#</a>
+</h2>
+<blockquote>
+<p>为了保证容器运行环境的一致性，镜像必须把应用程序所在操作系统的根目录，也就是 rootfs，都包含进来。
+但如果每个镜像都重复做这样的打包操作，仍然会导致大量的冗余。</p></blockquote>
+<p><strong>分层</strong>。
+容器镜像内部是由许多的<strong>镜像层</strong>组成的，每层都是<strong>只读不可修改</strong>的一组文件，相同的层可以在镜像之间<strong>共享</strong>，然后多个层像搭积木一样堆叠起来，再使用一种叫“Union FS 联合文件系统”的技术把它们合并在一起。</p>
+<p>可以用命令 docker inspect 来查看镜像的分层信息：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker inspect nginx:alpine
+</span></span></code></pre></div><pre tabindex="0"><code>//...
+ &#34;RootFS&#34;: {
+            &#34;Type&#34;: &#34;layers&#34;,
+            &#34;Layers&#34;: [
+                &#34;sha256:92770f546e065c4942829b1f0d7d1f02c2eb1e6acf0d1bc08ef0bf6be4972839&#34;,
+                &#34;sha256:8ae474e0cc8f5a81405b04143604f78bfac4756c523e276a36921a8c4da36567&#34;,
+                &#34;sha256:f5525891d9e9b43a95b4aa1f79405087922489eb300864a2683262aae0fa5b3a&#34;,
+                &#34;sha256:66283570f41bca3619443d121a79e810b8a72849b5329319993e538d563b3e2f&#34;,
+                &#34;sha256:c2d3ab485d1b375fdd309458d69d93f8eb9aba8472e928efa32d9e5eda631440&#34;,
+                &#34;sha256:cddc309885a283a35ef142af78bc6f2e9c9db10e1981c4ea9cfb2c00b83e68ff&#34;,
+                &#34;sha256:0d0e9c83b6f775d68c7517aabf39ec9123ffca29672e3c3f83c5af7fc6aa242b&#34;
+            ]
+        },
+//...
+</code></pre><h2 id="dockerfile-是什么">
+  Dockerfile 是什么
+  <a class="anchor" href="#dockerfile-%e6%98%af%e4%bb%80%e4%b9%88">#</a>
+</h2>
+<p>Dockerfile 是一个文本格式的配置文件，里面记录了一系列的构建指令，比如选择基础镜像、拷贝文件、运行脚本等等，每个指令都会生成一个 Layer，而 Docker 顺序执行这个文件里的所有步骤，最后就会创建出一个新的镜像出来。</p>
+<p>示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># 使用Python 3.9作为基础镜像</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> python:3.9-slim</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 设置工作目录</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 复制当前目录下的所有文件到工作目录</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> . /app<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 安装依赖</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> pip install --no-cache-dir -r requirements.txt<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 暴露端口</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 5000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 容器启动时执行的命令</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;python&#34;</span>, <span style="color:#e6db74">&#34;app.py&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker build -t my-python-app .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 运行容器</span>
+</span></span><span style="display:flex;"><span>docker run -p 5000:5000 my-python-app
+</span></span></code></pre></div><ol>
+<li>创建镜像需要编写 Dockerfile，写清楚创建镜像的步骤，每个指令都会生成一个Layer</li>
+<li>Dockerfile 里，第一个指令必须是 FROM，用来选择基础镜像，常用的有 Alpine、
+Ubuntu 等。其他常用的指令有：COPY、RUN、EXPOSE，分别是拷贝文件，运行 Shell
+命令，声明服务端口号。</li>
+<li>docker build 需要用 -f 来指定 Dockerfile，如果不指定就使用当前目录下名字是
+“Dockerfile”的文件。</li>
+<li>docker build 需要指定“构建上下文”，其中的文件会打包上传到 Docker daemon，所以尽量不要在“构建上下文”中存放多余的文件。</li>
+<li>创建镜像的时候应当尽量使用 -t 参数，为镜像起一个有意义的名字，方便管理。5.</li>
+</ol>
+<h5 id="镜像里的层都是只读不可修改的但容器运行的时候经常会写入数据这个冲突应该怎么解决呢">
+  镜像里的层都是只读不可修改的，但容器运行的时候经常会写入数据，这个冲突应该怎么解决呢？
+  <a class="anchor" href="#%e9%95%9c%e5%83%8f%e9%87%8c%e7%9a%84%e5%b1%82%e9%83%bd%e6%98%af%e5%8f%aa%e8%af%bb%e4%b8%8d%e5%8f%af%e4%bf%ae%e6%94%b9%e7%9a%84%e4%bd%86%e5%ae%b9%e5%99%a8%e8%bf%90%e8%a1%8c%e7%9a%84%e6%97%b6%e5%80%99%e7%bb%8f%e5%b8%b8%e4%bc%9a%e5%86%99%e5%85%a5%e6%95%b0%e6%8d%ae%e8%bf%99%e4%b8%aa%e5%86%b2%e7%aa%81%e5%ba%94%e8%af%a5%e6%80%8e%e4%b9%88%e8%a7%a3%e5%86%b3%e5%91%a2">#</a>
+</h5>
+<p>docker在挂载镜像文件的时候除了镜像文件的只读层，还会挂载一个‘可读写层’，在容器运行时，它以copy-on-write的方式，记录容器中的“写”操作；</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#镜像的内部机制是什么">镜像的内部机制是什么</a></li>
+    <li><a href="#dockerfile-是什么">Dockerfile 是什么</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

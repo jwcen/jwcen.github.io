@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  容器是什么
+  #
+
+容器，就是一个特殊的隔离环境，它能够让进程只看到这个环境里的有限信息，不能对外界环境施加影响。本质：容器就是被隔离的进程。
+
+  为什么要隔离
+  #
+
+
+系统安全。 不受限制的程序十分危险，系统被搞瘫痪、信息泄露等。
+使用容器技术，让应用程序运行在一个有严密防护的“沙盒”环境中，从而保证了容器外系统的安全。
+进行资源隔离。 只能使用指定的配额，避免容器内进程的过度系统消耗。
+
+
+  容器和虚拟机的区别？优势？
+  #
+
+首先，容器和虚拟机的目的都是隔离资源，保证系统安全，然后是尽量提高资源的利用率。
+虚拟机
+
+能在宿主机系统里完整虚拟化出一套计算机硬件，并能安装任意操作系统，内外两个系统完全隔离，互不打扰。
+可以把一台物理服务器虚拟成多台逻辑服务器，这些逻辑服务器彼此独立，可以按需分隔物理服务器的资源，
+为不同的用户所使用。
+
+容器
+
+直接利用了下层的计算机硬件和操作系统，比虚拟机少了一层，更加节约 cpu 和内存，非常轻量级，能够高效利用硬件资源。
+但由于多个容器共用一个操作系统内核，应用程序的隔离程度就没有虚拟机高了。
+
+相比虚拟机技术，容器更加轻巧、更加高效，消耗的系统资源非常少，在云计算时代极
+具优势。
+
+
+  隔离怎么实现的
+  #
+
+
+namespace: 可以创建出独立的文件系统、主机名、进程号、网络等资源空间，实现了系统全局资源和进程局部资源的隔离。
+cgroup：实现对进程的 CPU、内存等资源的优先级和配额限制。
+chroot: 可以更改进程的根目录，也就是限制访问文件系统。（目前使用 pivot-root）
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/docs/docker/1/">
+  <meta property="og:site_name" content="My New Hugo Site">
+  <meta property="og:title" content="My New Hugo Site">
+  <meta property="og:description" content="容器是什么 # 容器，就是一个特殊的隔离环境，它能够让进程只看到这个环境里的有限信息，不能对外界环境施加影响。本质：容器就是被隔离的进程。
+为什么要隔离 # 系统安全。 不受限制的程序十分危险，系统被搞瘫痪、信息泄露等。 使用容器技术，让应用程序运行在一个有严密防护的“沙盒”环境中，从而保证了容器外系统的安全。 进行资源隔离。 只能使用指定的配额，避免容器内进程的过度系统消耗。 容器和虚拟机的区别？优势？ # 首先，容器和虚拟机的目的都是隔离资源，保证系统安全，然后是尽量提高资源的利用率。
+虚拟机
+能在宿主机系统里完整虚拟化出一套计算机硬件，并能安装任意操作系统，内外两个系统完全隔离，互不打扰。 可以把一台物理服务器虚拟成多台逻辑服务器，这些逻辑服务器彼此独立，可以按需分隔物理服务器的资源， 为不同的用户所使用。 容器
+直接利用了下层的计算机硬件和操作系统，比虚拟机少了一层，更加节约 cpu 和内存，非常轻量级，能够高效利用硬件资源。 但由于多个容器共用一个操作系统内核，应用程序的隔离程度就没有虚拟机高了。 相比虚拟机技术，容器更加轻巧、更加高效，消耗的系统资源非常少，在云计算时代极 具优势。
+隔离怎么实现的 # namespace: 可以创建出独立的文件系统、主机名、进程号、网络等资源空间，实现了系统全局资源和进程局部资源的隔离。 cgroup：实现对进程的 CPU、内存等资源的优先级和配额限制。 chroot: 可以更改进程的根目录，也就是限制访问文件系统。（目前使用 pivot-root）">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+<title>1.容器是什么 | My New Hugo Site</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="http://localhost:1313/docs/docker/1/">
+<link rel="stylesheet" href="/book.min.a7616cf2799b58bddffce9438e31fdbfc6393687cfc0950a4a17cd1cce7e35f6.css" integrity="sha256-p2Fs8nmbWL3f/OlDjjH9v8Y5NofPwJUKShfNHM5&#43;NfY=" crossorigin="anonymous">
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/en.search.min.0cfb758d5015d0ed3024b26cd0d3f4e531f056bba8d896d2ef6c002b339e050e.js" integrity="sha256-DPt1jVAV0O0wJLJs0NP05THwVruo2JbS72wAKzOeBQ4=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>My New Hugo Site</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-3f1cb50e59bc1f6ffc84a359e23bb83b" class="toggle"  />
+    <label for="section-3f1cb50e59bc1f6ffc84a359e23bb83b" class="flex justify-between">
+      <a href="/docs/example/" class="">Example Site</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-c9d631a7ec46475d0b08fd93f0a51b51" class="toggle"  />
+    <label for="section-c9d631a7ec46475d0b08fd93f0a51b51" class="flex justify-between">
+      <a href="/docs/example/table-of-contents/" class="">Table of Contents</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/with-toc/" class="">With ToC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/without-toc/" class="">Without ToC</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-9fe5b538104d6feedd6d4402876a890c" class="toggle"  />
+    <label for="section-9fe5b538104d6feedd6d4402876a890c" class="flex justify-between">
+      <a role="button" class="">Collapsed</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/collapsed/3rd-level/" class="">3rd Level</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/collapsed/3rd-level/4th-level/" class="">4th Level</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-91ff85055480c667e82e532fec029d40" class="toggle" checked />
+    <label for="section-91ff85055480c667e82e532fec029d40" class="flex justify-between">
+      <a role="button" class="">Docker</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/1/" class="active">1.容器是什么</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/2/" class="">2.常用的容器操作</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/3/" class="">3.创建容器镜像：如何编写正确、高效的 Dockerfile</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/docker/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-6304924f51347481f4da36aae1a9b36d" class="toggle"  />
+    <label for="section-6304924f51347481f4da36aae1a9b36d" class="flex justify-between">
+      <a role="button" class="">Example3</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/buttons/" class="">Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/columns/" class="">Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/details/" class="">Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example3/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-2e51356a195401a62fea7dc12e8423f5" class="toggle"  />
+    <label for="section-2e51356a195401a62fea7dc12e8423f5" class="flex justify-between">
+      <a role="button" class="">Golang</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/buttons/" class="">Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/columns/" class="">Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/details/" class="">Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/golang/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="/posts/"  >
+        Blog
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>1.容器是什么</h3>
+
+  <label for="toc-control">
+    
+    <img src="/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么要隔离">为什么要隔离</a></li>
+    <li><a href="#容器和虚拟机的区别优势">容器和虚拟机的区别？优势？</a></li>
+    <li><a href="#隔离怎么实现的">隔离怎么实现的</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="容器是什么">
+  容器是什么
+  <a class="anchor" href="#%e5%ae%b9%e5%99%a8%e6%98%af%e4%bb%80%e4%b9%88">#</a>
+</h1>
+<p>容器，就是一个特殊的隔离环境，它能够让进程只看到这个环境里的有限信息，不能对外界环境施加影响。本质：<strong>容器就是被隔离的进程。</strong></p>
+<h2 id="为什么要隔离">
+  为什么要隔离
+  <a class="anchor" href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a6%81%e9%9a%94%e7%a6%bb">#</a>
+</h2>
+<ul>
+<li><strong>系统安全。</strong> 不受限制的程序十分危险，系统被搞瘫痪、信息泄露等。
+使用容器技术，让应用程序运行在一个有严密防护的“沙盒”环境中，从而保证了容器外系统的安全。</li>
+<li><strong>进行资源隔离。</strong> 只能使用指定的配额，避免容器内进程的过度系统消耗。</li>
+</ul>
+<h2 id="容器和虚拟机的区别优势">
+  容器和虚拟机的区别？优势？
+  <a class="anchor" href="#%e5%ae%b9%e5%99%a8%e5%92%8c%e8%99%9a%e6%8b%9f%e6%9c%ba%e7%9a%84%e5%8c%ba%e5%88%ab%e4%bc%98%e5%8a%bf">#</a>
+</h2>
+<p>首先，容器和虚拟机的目的都是隔离资源，保证系统安全，然后是尽量提高资源的利用率。</p>
+<p>虚拟机</p>
+<ul>
+<li>能在宿主机系统里完整虚拟化出一套计算机硬件，并能安装任意操作系统，内外两个系统完全隔离，互不打扰。</li>
+<li>可以把一台物理服务器虚拟成多台逻辑服务器，这些逻辑服务器彼此独立，可以按需分隔物理服务器的资源，
+为不同的用户所使用。</li>
+</ul>
+<p>容器</p>
+<ul>
+<li>直接利用了下层的计算机硬件和操作系统，比虚拟机少了一层，更加节约 cpu 和内存，非常轻量级，能够高效利用硬件资源。</li>
+<li>但由于多个容器共用一个操作系统内核，应用程序的隔离程度就没有虚拟机高了。</li>
+</ul>
+<p>相比虚拟机技术，容器更加轻巧、更加高效，消耗的系统资源非常少，在云计算时代极
+具优势。</p>
+<p><img src="/imgs/docker/image.png" alt="alt text" /></p>
+<h2 id="隔离怎么实现的">
+  隔离怎么实现的
+  <a class="anchor" href="#%e9%9a%94%e7%a6%bb%e6%80%8e%e4%b9%88%e5%ae%9e%e7%8e%b0%e7%9a%84">#</a>
+</h2>
+<ul>
+<li><code>namespace</code>: 可以创建出独立的文件系统、主机名、进程号、网络等资源空间，实现了系统全局资源和进程局部资源的隔离。</li>
+<li><code>cgroup</code>：实现对进程的 CPU、内存等资源的优先级和配额限制。</li>
+<li><code>chroot</code>: 可以更改进程的根目录，也就是限制访问文件系统。（目前使用 pivot-root）</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么要隔离">为什么要隔离</a></li>
+    <li><a href="#容器和虚拟机的区别优势">容器和虚拟机的区别？优势？</a></li>
+    <li><a href="#隔离怎么实现的">隔离怎么实现的</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

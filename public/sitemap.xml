@@ -66,6 +66,46 @@
   </url><url>
     <loc>http://localhost:1313/docs/example/hidden/</loc>
   </url><url>
+    <loc>http://localhost:1313/docs/example3/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/buttons/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/columns/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/details/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/hints/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/mermaid/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/section/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/section/first-page/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/section/second-page/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/tabs/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/buttons/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/columns/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/details/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/hints/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/mermaid/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/section/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/section/first-page/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/section/second-page/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/tabs/</loc>
+  </url><url>
     <loc>http://localhost:1313/docs/golang/</loc>
   </url><url>
     <loc>http://localhost:1313/docs/golang/buttons/</loc>
@@ -87,6 +127,10 @@
     <loc>http://localhost:1313/docs/golang/tabs/</loc>
   </url><url>
     <loc>http://localhost:1313/docs/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example3/katex/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/golang-copy/katex/</loc>
   </url><url>
     <loc>http://localhost:1313/docs/golang/katex/</loc>
   </url>
